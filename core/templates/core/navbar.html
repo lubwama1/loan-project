@@ -1,0 +1,118 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+  <div class="container">
+    <!-- Brand/Logo -->
+    <a class="navbar-brand fw-bold d-flex align-items-center" href="#">
+      <i class="fas fa-hand-holding-usd me-2"></i>
+      Instant Loan
+    </a>
+
+    <!-- Mobile Toggle Button -->
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#mainNavbar"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Navbar Content -->
+    <div class="collapse navbar-collapse" id="mainNavbar">
+      <!-- Left Side Links -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        {% if request.user.is_authenticated %}
+        <li class="nav-item">
+          <a class="nav-link active" href="{% url 'core:home' %}">
+            <i class="fas fa-home me-1"></i> Home
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'core:contact' %}">
+            <i class="fas fa-envelope me-1"></i> Contact
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">
+            <i class="fas fa-info-circle me-1"></i> About
+          </a>
+        </li>
+        {% if request.user.is_staff %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'loan:add-loan' %}">
+            <i class="fas fa-plus-circle me-1"></i> Add Loan
+          </a>
+        </li>
+        {% endif %} {% endif %}
+      </ul>
+
+      <!-- Right Side Links -->
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        {% if request.user.is_authenticated %}
+        <!-- User Dropdown -->
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle d-flex align-items-center"
+            href="#"
+            role="button"
+            data-bs-toggle="dropdown"
+          >
+            <div class="me-2">
+              {% if request.user.profile.image %}
+              <img
+                src="{{ request.user.profile.image.url }}"
+                alt="Profile"
+                class="rounded-circle"
+                width="30"
+                height="30"
+              />
+              {% else %}
+              <span
+                class="bg-light text-primary rounded-circle p-2 d-flex align-items-center justify-content-center"
+                style="width: 30px; height: 30px"
+              >
+                <i class="fas fa-user"></i>
+              </span>
+              {% endif %}
+            </div>
+            <span>{{ request.user.username }}</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+              <a class="dropdown-item" href="{% url 'users:profile' %}"
+                ><i class="fas fa-user me-2"></i> Profile</a
+              >
+            </li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+              <a
+                class="dropdown-item text-danger"
+                href="{% url 'users:logout' %}"
+              >
+                <i class="fas fa-sign-out-alt me-2"></i> Logout
+              </a>
+            </li>
+          </ul>
+        </li>
+        {% else %}
+        <!-- Guest Links -->
+        <li class="nav-item">
+          <a
+            class="nav-link btn btn-outline-dark me-2"
+            href="{% url 'users:login' %}"
+          >
+            <i class="fas fa-sign-in-alt me-1"></i> Login
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link btn btn-secondary text-white"
+            href="{% url 'users:signup' %}"
+          >
+            <i class="fas fa-user-plus me-1"></i> Register
+          </a>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>

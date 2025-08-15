@@ -1,0 +1,100 @@
+{% extends 'core/base.html' %} {% load crispy_forms_tags %} {% block content %}
+
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white">
+          <h3 class="card-title mb-0 text-center">
+            <i class="fas fa-plus-circle me-2"></i> Add New Loan Product
+          </h3>
+        </div>
+        <div class="card-body p-4">
+          <form
+            action="{% url 'loan:add-loan' %}"
+            method="post"
+            class="needs-validation"
+            novalidate
+          >
+            {% csrf_token %}
+
+            <!-- Basic Information Section -->
+            <div class="mb-4">
+              <h5 class="mb-3 border-bottom pb-2">
+                <i class="fas fa-info-circle text-primary me-2"></i>Basic
+                Information
+              </h5>
+              <div class="row g-3">
+                <div class="col-md-6">{{ form.name|as_crispy_field }}</div>
+                <div class="col-md-6">{{ form.slug|as_crispy_field }}</div>
+                <div class="col-12">
+                  {{ form.short_description|as_crispy_field }}
+                </div>
+                <div class="col-12">{{ form.description|as_crispy_field }}</div>
+              </div>
+            </div>
+
+            <!-- Loan Details Section -->
+            <div class="mb-4">
+              <h5 class="mb-3 border-bottom pb-2">
+                <i class="fas fa-calculator text-primary me-2"></i>Loan Details
+              </h5>
+              <div class="row g-3">
+                <div class="col-md-6">{{ form.loan_type|as_crispy_field }}</div>
+                <div class="col-md-6">{{ form.icon|as_crispy_field }}</div>
+                <div class="col-md-6">
+                  {{ form.min_amount|as_crispy_field }}
+                </div>
+                <div class="col-md-6">
+                  {{ form.max_amount|as_crispy_field }}
+                </div>
+                <div class="col-md-6">
+                  {{ form.interest_rate|as_crispy_field }}
+                </div>
+                <div class="col-md-6">
+                  {{ form.term_length|as_crispy_field }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Additional Settings -->
+            <div class="mb-4">
+              <h5 class="mb-3 border-bottom pb-2">
+                <i class="fas fa-cog text-primary me-2"></i>Additional Settings
+              </h5>
+              <div class="row">
+                <div class="col-md-6">{{ form.featured|as_crispy_field }}</div>
+                <div class="col-12">
+                  {{ form.requirements|as_crispy_field }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Form Submission -->
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+              <a
+                href="{% url 'loan:loan-list' %}"
+                class="btn btn-outline-secondary me-md-2"
+              >
+                <i class="fas fa-times me-1"></i> Cancel
+              </a>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-1"></i> Save Loan Product
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .description-textarea,
+  .requirements-textarea {
+    resize: none;
+    height: 80px;
+  }
+</style>
+
+{% endblock content %}

@@ -1,0 +1,238 @@
+{% extends 'core/base.html' %}
+{% block content %}
+
+<div class="container">
+  {% if messages %}
+  <div class="row">
+    <div class="col-12">
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-2 text-center mt-2">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">
+              <i class="fas fa-credit-card me-2"></i> Payment Schedule
+            </h4>
+            <span class="badge bg-light text-dark">
+              {{ loan.get_status_display }}
+            </span>
+          </div>
+        </div>
+        
+        <div class="card-body">
+          {% if loan_is_paid %}
+            <div class="alert alert-success">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-check-circle fa-2x me-3"></i>
+                <div>
+                  <h4 class="alert-heading">Loan Fully Repaid!</h4>
+                  <p>No further payments are required for this loan.</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="text-center mt-4">
+              <a href="{% url 'loan:loan-list' %}" class="btn btn-primary">
+                <i class="fas fa-arrow-left me-2"></i> Back to My Loans
+              </a>
+            </div>
+          
+          {% elif not has_available_loans %}
+            <div class="alert alert-info">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-info-circle fa-2x me-3"></i>
+                <div>
+                  <h4 class="alert-heading">No Active Loans</h4>
+                  <p>You don't have any approved loans available for payment.</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="text-center mt-4">
+              <a href="{% url 'loan:loan-application' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i> Apply for a New Loan
+              </a>
+            </div>
+          
+          {% else %}
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <div class="card mb-3">
+                  <div class="card-body">
+                    <h5 class="card-title">Loan Summary</h5>
+                    <ul class="list-group list-group-flush">
+                      <li class="list-group-item d-flex justify-content-between">
+                        <span>Principal:</span>
+                        <span>${{ loan.amount }}</span>
+                      </li>
+                      <li class="list-group-item d-flex justify-content-between">
+                        <span>Interest ({{ loan.loan.interest_rate }}%):</span>
+                        <span>${{ repayment_amount|add:loan.amount|floatformat:2 }}</span>
+                      </li>
+                      <li class="list-group-item d-flex justify-content-between">
+                        <span>Total Due:</span>
+                        <span class="fw-bold">${{ repayment_amount|floatformat:2 }}</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Payment Options</h5>
+                    <ul class="list-group list-group-flush">
+                      <li class="list-group-item d-flex justify-content-between">
+                        <span>Monthly Payment:</span>
+                        <span class="fw-bold">${{ monthly_payment|floatformat:2 }}</span>
+                      </li>
+                      <li class="list-group-item d-flex justify-content-between">
+                        <span>One-time Payment:</span>
+                        <span class="fw-bold">${{ repayment_amount|floatformat:2 }}</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Payment History Section -->
+            {% if loan.payments.exists %}
+            <div class="card mb-4">
+              <div class="card-header bg-light">
+                <h5 class="mb-0">Your Payment History</h5>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Method</th>
+                        <th>Status</th>
+                        <th>Reference</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for payment in loan.payments.all %}
+                      <tr>
+                        <td>{{ payment.due_date|date:"M d, Y" }}</td>
+                        <td>${{ payment.amount|floatformat:2 }}</td>
+                        <td>{{ payment.get_method_display }}</td>
+                        <td>
+                          <span class="badge bg-{% if payment.status == 'Completed' %}success{% elif payment.status == 'Failed' %}danger{% else %}warning{% endif %}">
+                            {{ payment.status }}
+                          </span>
+                        </td>
+                        <td>{{ payment.reference_number }}</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+
+            <form method="post" class="needs-validation" novalidate>
+              {% csrf_token %}
+              
+              <div class="mb-3">
+                <label class="form-label">Select Loan</label>
+                <select class="form-select" name="loan_id" required>
+                  {% for loan in user_loans %}
+                  <option value="{{ loan.id }}" {% if loan.id == loan.id %}selected{% endif %}>
+                    {{ loan.loan.name }} ({{ loan.loan.term_length }} months) - ${{ loan.amount }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Payment Amount</label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input type="number" class="form-control" name="amount" 
+                         value="{{ monthly_payment|floatformat:2 }}" step="0.01" min="0.01" required>
+                </div>
+                <small class="text-muted">Enter ${{ monthly_payment|floatformat:2 }} for monthly or ${{ repayment_amount|floatformat:2 }} for one-time</small>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Payment Method</label>
+                  <select class="form-select" name="method" required>
+                    <option value="">Select method</option>
+                    <option value="MM">Mobile Money</option>
+                    <option value="BT">Bank Transfer</option>
+                    <option value="CC">Credit Card</option>
+                  </select>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Payment Frequency</label>
+                  <select class="form-select" name="frequency" required>
+                    <option value="MN">Monthly</option>
+                    <option value="OT">One-time</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-check mb-4">
+                <input class="form-check-input" type="checkbox" id="terms" required>
+                <label class="form-check-label" for="terms">
+                  I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">terms and conditions</a>
+                </label>
+              </div>
+
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg">
+                  <i class="fas fa-paper-plane me-2"></i> Submit Payment
+                </button>
+              </div>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Terms Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Payment Terms</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>By proceeding with this payment, you agree to the following terms:</p>
+        <ul>
+          <li>Late payments may incur additional fees</li>
+          <li>Failed payments will be retried automatically</li>
+          <li>Monthly payments will continue until the loan is fully repaid</li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

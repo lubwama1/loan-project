@@ -1,0 +1,79 @@
+{% extends 'core/base.html' %} {% block content %}
+
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-10 col-md-12">
+      <div class="card border-0 shadow-sm">
+        <!-- Card Header -->
+        <div class="card-header bg-primary text-white">
+          <div class="d-flex justify-content-between align-items-center">
+            <h2 class="h5 mb-0">
+              <i class="fas fa-file-alt me-2"></i>My Loan Applications
+            </h2>
+            <span class="badge bg-light text-primary rounded-pill">
+              {{ applications.count }} application{{ applications.count|pluralize }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Card Body -->
+        <div class="card-body p-0">
+          {% if applications %}
+          <div class="list-group list-group-flush">
+            {% for app in applications %}
+            <div class="list-group-item list-group-item-action">
+              <div
+                class="d-flex justify-content-between align-items-center flex-wrap"
+              >
+                <div class="mb-2 mb-md-0">
+                  <h5 class="mb-1">{{ app.loan.name }}</h5>
+                  <div class="d-flex flex-wrap text-muted small">
+                    <span class="me-3">
+                      <i class="fas fa-calendar-alt me-1"></i>
+                      Applied: {{ app.applied_date|date:"M d, Y" }}
+                    </span>
+                    <span class="me-3">
+                      <i class="fas fa-dollar-sign me-1"></i>
+                      Amount: ${{ app.amount|floatformat:2 }}
+                    </span>
+                    <span>
+                      <i class="fas fa-percent me-1"></i>
+                      Rate: {{ app.loan.interest_rate }}%
+                    </span>
+                  </div>
+                </div>
+                <div class="d-flex">
+                  <a
+                    href="{% url 'loan:view-application' app.pk %}"
+                    class="btn btn-sm btn-outline-primary me-2"
+                    title="View application details"
+                  >
+                    <i class="fas fa-eye me-1"></i>Details
+                  </a>
+                  <span
+                    class="badge bg-{% if app.status == app.LoanStatus.APPROVED %}success{% elif app.status == app.LoanStatus.REJECTED %}danger{% else %}info{% endif %} text-center"
+                  > 
+                    {{ app.get_status_display }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="text-center py-5">
+            <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No applications found</h5>
+            <p class="text-muted">You haven't applied for any loans yet</p>
+            <a href="{% url 'loan:loan-list' %}" class="btn btn-primary mt-2">
+              <i class="fas fa-plus me-1"></i>Apply for a Loan
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

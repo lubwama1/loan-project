@@ -1,0 +1,67 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {% block title %} {% if request.path == '/' %}
+    <title>Instant Loan - Home</title>
+    {% elif request.path == '/users/login/' %}
+    <title>Instant Loan - Login</title>
+    {% elif request.path == '/users/signup/' %}
+    <title>Instant Loan - Signup</title>
+    {% elif request.path == '/users/profile/' %}
+    <title>Instant Loan - Profile</title>
+    {% elif request.path == '/users/edit-profile/' %}
+    <title>Instant Loan - Edit Profile</title>
+    {% elif request.path == '/notifications/notifications/' %}
+    <title>Instant Loan - Notifications</title>
+    {% elif request.path == '/loan/loan-list/' %}
+    <title>Instant Loan - Loan List</title>
+    {% elif request.path == '/loan/loan-status/' %}
+    <title>Instant Loan - Loan Status</title>
+    {% elif request.path == '/loan/add-loan/' %}
+    <title>Instant Loan - Add Loan Product</title>
+    {% elif request.path == '/loan/my-applications/' %}
+    <title>Instant Loan - My Applications</title>
+    {% elif request.path == '/dashboard/applicants/' %}
+    <title>Instant Loan - Applicants</title>
+    {% else %}
+    <title>Instant Loan</title>
+    {% endif %} {% endblock title %} {% block css %}
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/loan-application.css' %}" />
+    <!-- Animation link -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
+
+    <!-- Font Awesome CDN -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    {% endblock css %}
+  </head>
+  <body>
+    {% include 'core/navbar.html' %} {% block content %} {% endblock content %}
+    {% include 'core/footer.html' %} {% block js %}
+
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/loan-application.js' %}"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+      crossorigin="anonymous"
+    ></script>
+
+    {% endblock js %}
+  </body>
+</html>

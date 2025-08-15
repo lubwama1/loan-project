@@ -1,0 +1,167 @@
+{% extends 'core/base.html' %} {% load static %} {% block content %}
+
+<div
+  class="{% if request.user.is_authenticated %}container-fluid{% else %}container{% endif %}"
+>
+  <!-- Messages -->
+  {% if messages %}
+  <div class="row">
+    <div class="col-12">
+      {% for message in messages %}
+      <div
+        class="alert alert-{{ message.tags }} alert-dismissible fade show mb-2"
+      >
+        {{ message }}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="row">
+    <!-- Sidebar -->
+    {% if request.user.is_authenticated %}
+    <div class="col-lg-2 col-md-3 d-none d-md-block bg-light pt-3">
+      <div class="sticky-top" style="top: 20px">
+        <div class="text-center mb-4">
+          <img
+            src="{% if request.user.profile.image %}{{ request.user.profile.image.url }}{% else %}{% static 'media/default.jpg' %}{% endif %}"
+            class="img-thumbnail rounded-circle mx-auto d-block"
+            style="width: 150px; height: 150px; object-fit: cover"
+            alt="{{ request.user.profile.first_name }} {{ request.user.profile.last_name}}'s profile picture"
+          />
+        </div>
+
+        <ul class="nav flex-column">
+          {% if request.user == application.customer %}
+          <li class="nav-item mb-2">
+            <a class="nav-link" href="{% url 'loan:my-applications' %}">
+              <i class="fas fa-file-alt me-2"></i> My Applications
+            </a>
+          </li>
+          <li class="nav-item mb-2">
+            
+            <a
+              class="nav-link"
+              href="{% url 'payment:repayment-schedule' application.pk %}"
+            >
+              <i class="fas fa-calendar-check me-2 text-success"></i> Repayment
+              Schedule
+            </a>
+          </li>
+          {% endif %}
+          <li class="nav-item mb-2">
+            <a
+              class="nav-link"
+              href="{% url 'notifications:show-notifications' %}"
+            >
+              <i class="fas fa-bell me-2 text-warning"></i> Notifications
+              <span class="badge bg-danger rounded-pill ms-2" id="is-read"
+                >{{ is_read }}</span
+              >
+            </a>
+          </li>
+          <li class="nav-item mb-2">
+            <a class="nav-link" href="{% url 'users:profile' %}">
+              <i class="fas fa-user me-2 text-info"></i> Profile
+            </a>
+          </li>
+          <li class="nav-item mt-4 pt-2 border-top">
+            <a class="nav-link text-danger" href="{% url 'users:logout' %}">
+              <i class="fas fa-sign-out-alt me-2"></i> Logout
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    {% endif %}
+    <!-- Main Content -->
+    <div
+      class="{% if request.user.is_authenticated %}col-lg-10 col-md-9{% endif %} col-12 pt-3"
+    >
+      <!-- Hero Section -->
+      <div
+        class="jumbotron bg-primary bg-gradient text-white rounded-3 p-5 mb-4"
+      >
+        <h1 class="display-5 fw-bold">Get the financial support you need</h1>
+        <p class="lead">
+          Fast, flexible loans tailored to your needs with competitive rates and
+          quick approval.
+        </p>
+        <div class="mt-4 d-flex gap-3 flex-wrap">
+          <a class="btn btn-light btn-lg px-4" href="#">Learn More</a>
+          <a class="btn btn-outline-light btn-lg px-4" href="#">Apply Now</a>
+          {% if request.user.is_staff %}
+          <a
+            class="btn btn-warning btn-lg px-4 animate__animated animate__pulse animate__infinite"
+            href="{% url 'dashboard:applicants' %}"
+            style="animation-duration: 2s"
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            title="Admin Dashboard"
+            >Admin Dashboard</a
+          >
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Loan Options -->
+      <div class="mb-5">
+        <h2 class="fw-bold mb-4 text-center">
+          Loan Options <span class="text-primary">Tailored to Your Needs</span>
+        </h2>
+
+        <div class="row g-4">
+          {% if loans %} {% for loan in loans %}
+          <div class="col-sm-12 col-lg-4 col-md-4 mb-4">
+            <div
+              class="card h-100 border-0 shadow-sm transition-all hover-shadow"
+            >
+              <div class="card-body p-4">
+                <div class="d-flex align-items-start mb-3">
+                  <div class="bg-primary bg-opacity-10 p-3 rounded me-3">
+                    <i
+                      class="{% if loan.icon %}{{ loan.icon }}{% else %}fas fa-money-bill-wave{% endif %} fs-4 text-primary "
+                    ></i>
+                  </div>
+                  <div>
+                    <h5 class="card-title mb-1">{{ loan.name|title }}</h5>
+                    <p class="text-muted small mb-0">
+                      {{ loan.short_description }}
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href="{{ loan.get_absolute_url }}"
+                  class="stretched-link"
+                ></a>
+              </div>
+              <div class="card-footer bg-transparent border-top-0 pt-0">
+                <small class="text-primary fw-bold"
+                  >Learn more <i class="fas fa-arrow-right ms-1"></i
+                ></small>
+              </div>
+            </div>
+          </div>
+          {% endfor %} {% else %}
+          <div class="col-12">
+            <div class="alert alert-info text-center py-4">
+              <i class="fas fa-info-circle fa-2x mb-3"></i>
+              <h5>No available loans at the moment</h5>
+              <p class="mb-0">Please check back later or contact support</p>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

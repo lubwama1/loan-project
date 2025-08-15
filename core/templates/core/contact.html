@@ -1,0 +1,73 @@
+{% extends 'core/base.html' %} {% load crispy_forms_tags %} {% block content %}
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-lg border-0">
+        <div class="card-body p-4 p-md-5">
+          <!-- Header -->
+          <div class="text-center mb-5">
+            <h2 class="mb-3 text-primary">
+              <i class="fas fa-envelope me-2"></i>Contact Us
+            </h2>
+            <p class="text-muted lead">
+              Have a question, feedback, or just want to say hello? We'd love to
+              hear from you!
+            </p>
+          </div>
+
+          <!-- Contact Form -->
+          <form
+            method="post"
+            action="{% url 'core:contact' %}"
+            class="needs-validation"
+            novalidate
+          >
+            {% csrf_token %}
+
+            <!-- Crispy Form Fields -->
+            <div class="row g-3">
+              <div class="col-md-6">{{ form.full_name|as_crispy_field }}</div>
+              <div class="col-md-6">{{ form.email|as_crispy_field }}</div>
+              <div class="col-12">{{ form.message|as_crispy_field }}</div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="text-center mt-4">
+              <button class="btn btn-primary btn-lg px-4" type="submit">
+                <i class="fas fa-paper-plane me-2"></i> Send Message
+              </button>
+            </div>
+          </form>
+
+          <!-- Additional Contact Info -->
+          <div class="mt-5 pt-4 border-top text-center">
+            <h5 class="mb-4">Other Ways to Reach Us</h5>
+            <div class="row">
+              <div class="col-md-4 mb-3 mb-md-0">
+                <div class="d-flex flex-column align-items-center">
+                  <i class="fas fa-phone-alt fa-2x text-primary mb-2"></i>
+                  <span class="text-muted">+1 (123) 456-7890</span>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3 mb-md-0">
+                <div class="d-flex flex-column align-items-center">
+                  <i class="fas fa-envelope fa-2x text-primary mb-2"></i>
+                  <span class="text-muted">support@instantloan.com</span>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="d-flex flex-column align-items-center">
+                  <i class="fas fa-map-marker-alt fa-2x text-primary mb-2"></i>
+                  <span class="text-muted">UAE, Abu Dhabi</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

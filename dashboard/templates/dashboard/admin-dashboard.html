@@ -1,0 +1,88 @@
+{% extends 'core/base.html' %} {% block content %}
+<div class="container py-4">
+  <!-- Messages -->
+  {% if messages %}
+  <div class="row">
+    <div class="col-12">
+      {% for message in messages %}
+      <div
+        class="alert alert-{{ message.tags }} alert-dismissible fade show mb-2"
+      >
+        {{ message }}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  <div class="card shadow animate__animated animate__fadeIn">
+    <div class="card-header bg-primary text-white">
+      <h3 class="mb-0">Loan Applications</h3>
+    </div>
+    <div class="card-body">
+      {% if applications %}
+      <div class="table-responsive">
+        <table class="table table-hover table-bordered">
+          <thead class="table-light">
+            <tr>
+              <th scope="col" class="text-center">S/N</th>
+              <th scope="col" class="text-center">Full Name</th>
+              <th scope="col" class="text-center">Loan Type</th>
+              <th scope="col" class="text-center">Amount</th>
+              <th scope="col" class="text-center">Status</th>
+              <th scope="col" class="text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for applicant in applications %}
+            <tr
+              class="animate__animated animate__fadeInUp"
+              style="animation-delay: {{ forloop.counter0|divisibleby:2|yesno:'0.1s,0.2s' }}"
+            >
+              <th scope="row" class="fw-normal text-center">
+                {{ forloop.counter }}
+              </th>
+              {% with full_name=applicant.first_name|add:' '|add:applicant.last_name %}
+              <td class="text-center">{{ full_name }}</td>
+              {% endwith %}
+              <td class="text-center">{{ applicant.loan }}</td>
+              <td class="fw-bold text-center">${{ applicant.amount }}</td>
+              <td class="text-center">
+                <span
+                  class="badge {% if applicant.status == applicant.LoanStatus.REJECTED %}bg-danger{% elif applicant.status == applicant.LoanStatus.APPROVED %}bg-success{% else %}bg-info{% endif %}"
+                >
+                  {{ applicant.status }}
+                </span>
+              </td>
+              <td class="text-center">
+                <a
+                  href="{% url 'dashboard:view-application' applicant.pk %}"
+                  class="btn btn-sm btn-outline-primary animate__animated animate__pulse animate__infinite"
+                  style="animation-duration: 2s"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="top"
+                  title="View Application"
+                >
+                  <i class="fas fa-eye me-1"></i> View
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="text-center py-5 animate__animated animate__fadeIn">
+        <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">No applications found</h5>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock content %}

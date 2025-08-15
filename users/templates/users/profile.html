@@ -1,0 +1,311 @@
+{% extends 'core/base.html' %} {% load static %} {% block content %}
+<div class="container py-5">
+  <div class="row">
+    <!-- Left Column - Profile Summary -->
+    <div class="col-lg-4 col-md-4 col-sm-12">
+      <div class="card shadow-sm mb-4">
+        <div class="card-body text-center">
+          <div class="mb-4">
+            <img
+              src="{% if profile.image %}{{ profile.image.url }}{% else %}{% static 'media/default.jpg' %}{% endif %}"
+              alt="Profile image"
+              class="rounded img-fluid"
+            />
+          </div>
+          {% with full_name=profile.first_name|add:' '|add:profile.last_name %}
+          <h3 class="card-title mb-1">{{ full_name|default:user.username }}</h3>
+          {% endwith %}
+          <p class="text-muted mb-3">
+            Member since {{ user.date_joined|date:"M Y" }}
+          </p>
+          <a
+            href="{% url 'users:edit-profile' %}"
+            class="btn btn-sm rounded-pill btn-info mb-3"
+            >Edit Profile</a
+          >
+
+          <!-- Loan Status Summary -->
+          <div class="border-top pt-3">
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Active Loans</span>
+              <span class="fw-bold">{{ active_loan }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Total Borrowed</span>
+              <span class="fw-bold"
+                >${{ total_amount|default:"0"|floatformat:2 }}</span
+              >
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">Credit Score</span>
+              <span class="fw-bold">{{ credit_score|default:"-" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column - Main Content -->
+    <div class="col-lg-8 col-md-8 col-sm-12">
+      <!-- Account Overview -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h4 class="card-title mb-4">Account Overview</h4>
+
+          <!-- Active Loans -->
+          <div class="mb-4">
+            <h5 class="d-flex justify-content-between align-items-center">
+              <span>Active Loans</span>
+              <span class="badge bg-primary rounded-pill"
+                >{{ loan|length }}</span
+              >
+            </h5>
+
+            {% if loans %}
+            <div class="list-group">
+              {% for loan in loans %}
+              <!-- Changed variable name from 'app' to 'loan' for clarity -->
+              <div class="list-group-item">
+                <div class="d-flex w-100 justify-content-between">
+                  <h6 class="mb-1">
+                    {{ loan.loan.name }} #{{ loan.reference_number }}
+                  </h6>
+                  <span class="badge bg-{{ loan.get_status_display|lower }}">
+                    {{ loan.get_status_display }}
+                  </span>
+                </div>
+                <div class="d-flex justify-content-between mt-2">
+                  <small class="text-muted"
+                    >Amount: ${{ loan.amount|floatformat:2 }}</small
+                  >
+                  <small class="text-muted"
+                    >Term: {{ loan.loan.term_length }} months</small
+                  >
+                  <small class="text-muted"
+                    >Rate: {{ loan.loan.interest_rate }}%</small
+                  >
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle me-2"></i> You currently have no
+              active loans.
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Payment History section -->
+          <div class="mb-4">
+            <h5 class="mb-3">Recent Payments</h5>
+            {% if recent_payments %}
+            <div class="table-responsive">
+              <table class="table table-sm table-hover">
+                <thead class="table-light">
+                  <tr>
+                    <th>Date</th>
+                    <th>Loan</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for payment in recent_payments %}
+                  <tr>
+                    <td>{{ payment.due_date|date:"M d, Y" }}</td>
+                    <td>#{{ payment.loan_application.reference_number }}</td>
+                    <td>${{ payment.amount|floatformat:2 }}</td>
+                    <td>
+                      <span
+                        class="badge bg-{% if payment.status == 'Completed' %}success{% else %}warning{% endif %}"
+                      >
+                        {{ payment.get_status_display }}
+                      </span>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+              <a href="#" class="btn btn-sm btn-outline-primary mt-2"
+                >View Full History</a
+              >
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle me-2"></i> No payment history
+              available.
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Documents Section -->
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="card-title mb-0">My Documents</h4>
+            <button
+              class="btn btn-sm btn-outline-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#uploadDocumentModal"
+            >
+              <i class="fas fa-upload me-1"></i> Upload New
+            </button>
+          </div>
+
+          <div class="row">
+            {% for doc in loans %}
+            <!-- ID Proof -->
+            <div class="col-md-6 mb-3">
+              <div class="card h-100">
+                <div
+                  class="card-body text-center {% if not doc.id_proof %}py-4{% endif %}"
+                >
+                  {% if doc.id_proof %}
+                  <div class="d-flex">
+                    <i
+                      class="fas fa-id-card text-primary me-3"
+                      style="font-size: 2rem"
+                    ></i>
+                    <div>
+                      <h6 class="mb-1">ID Proof</h6>
+                      <small class="text-muted"
+                        >Uploaded: {{ doc.applied_date|date:"M d, Y" }}</small
+                      >
+                      <div class="mt-2">
+                        <a
+                          href="{{ doc.id_proof.url }}"
+                          target="_blank"
+                          class="btn btn-sm btn-outline-secondary me-1"
+                        >
+                          <i class="fas fa-eye"></i> View
+                        </a>
+                        <a
+                          href="{{ doc.id_proof.url }}"
+                          download
+                          class="btn btn-sm btn-outline-secondary"
+                        >
+                          <i class="fas fa-download"></i> Download
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  {% else %}
+                  <i
+                    class="fas fa-id-card text-muted mb-3"
+                    style="font-size: 2rem"
+                  ></i>
+                  <h6 class="text-muted">ID Proof Not Uploaded</h6>
+                  <button class="btn btn-sm btn-outline-primary mt-2">
+                    <i class="fas fa-upload me-1"></i> Upload Now
+                  </button>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Income Proof -->
+            <div class="col-md-6 mb-3">
+              <div class="card h-100">
+                <div
+                  class="card-body text-center {% if not doc.income_proof %}py-4{% endif %}"
+                >
+                  {% if doc.income_proof %}
+                  <div class="d-flex">
+                    <i
+                      class="fas fa-file-invoice-dollar text-success me-3"
+                      style="font-size: 2rem"
+                    ></i>
+                    <div>
+                      <h6 class="mb-1">Income Proof</h6>
+                      <small class="text-muted"
+                        >Uploaded: {{ doc.applied_date|date:"M d, Y" }}</small
+                      >
+                      <div class="mt-2">
+                        <a
+                          href="{{ doc.income_proof.url }}"
+                          target="_blank"
+                          class="btn btn-sm btn-outline-secondary me-1"
+                        >
+                          <i class="fas fa-eye"></i> View
+                        </a>
+                        <a
+                          href="{{ doc.income_proof.url }}"
+                          download
+                          class="btn btn-sm btn-outline-secondary"
+                        >
+                          <i class="fas fa-download"></i> Download
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  {% else %}
+                  <i
+                    class="fas fa-file-invoice-dollar text-muted mb-3"
+                    style="font-size: 2rem"
+                  ></i>
+                  <h6 class="text-muted">Income Proof Not Uploaded</h6>
+                  <button class="btn btn-sm btn-outline-primary mt-2">
+                    <i class="fas fa-upload me-1"></i> Upload Now
+                  </button>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class="modal fade"
+  id="uploadDocumentModal"
+  tabindex="-1"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Upload Document</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form method="post" enctype="multipart/form-data" action="">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Document Type</label>
+            <select class="form-select" name="document_type" required>
+              <option value="" selected disabled>Select document type</option>
+              <option value="id_proof">ID Proof</option>
+              <option value="income_proof">Income Proof</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Choose File</label>
+            <input
+              class="form-control"
+              type="file"
+              name="document_file"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary w-100">
+            Upload Document
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
